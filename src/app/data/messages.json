@@ -1,0 +1,26 @@
+[
+  {
+    "id": "321432432",
+    "text": "Hello, world!",
+    "locations": ["Bucha", "Kyiv"],
+    "tags": ["tanks", "shahed drones"],
+    "sentiment": -1,
+    "date": "01-05-2023"
+  },
+  {
+    "id": "43432423",
+    "text": "Hello, world!",
+    "locations": ["Bucha", "Kyiv"],
+    "tags": ["tanks", "shahed drones"],
+    "sentiment": -2,
+    "date": "01-06-2023"
+  },
+  {
+    "id": "432432432",
+    "text": "Hello, world!",
+    "locations": ["Bucha", "Kyiv"],
+    "tags": ["tanks", "shahed drones"],
+    "sentiment": -2,
+    "date": "01-07-2023"
+  }
+]
