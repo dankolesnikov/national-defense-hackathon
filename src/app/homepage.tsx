@@ -2,7 +2,7 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 import "@mantine/core/styles.css";
-import { AppShell, Title } from "@mantine/core";
+import { AppShell, Group, Title, useMantineColorScheme } from "@mantine/core";
 import { RadarChart } from "@mantine/charts";
 import { Timeline, Text } from "@mantine/core";
 import {
@@ -11,14 +11,31 @@ import {
   IconNumber3,
   IconNumber4,
 } from "@tabler/icons-react";
-
+import torch_dark_mode from "../../public/torch_white.svg";
+import torch_light_mode from "../../public/torch_black.svg";
+import { DarkModeToggle } from "./components/DarkModeToggle";
 export default function HomePage() {
+  const { colorScheme } = useMantineColorScheme();
+
   return (
     <AppShell header={{ height: { base: 48, sm: 60, lg: 76 } }}>
       <AppShell.Header
         style={{ alignItems: "center", justifyContent: "center" }}
       >
-        <Title order={1}>Torch</Title>
+        <Group justify="space-between" pr="0.5rem" pt="0.6rem">
+          <Group gap={0}>
+            <Image
+              src={colorScheme === "light" ? torch_light_mode : torch_dark_mode}
+              alt={""}
+              width={50}
+              height={50}
+            />
+            <Title fz="h1" fw="300">
+              Torch
+            </Title>
+          </Group>
+          <DarkModeToggle />
+        </Group>
       </AppShell.Header>
       <AppShell.Main>
         <RadarChart
