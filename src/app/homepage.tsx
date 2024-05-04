@@ -11,8 +11,41 @@ import {
   IconNumber3,
   IconNumber4,
 } from "@tabler/icons-react";
+import { getMessages } from "@/utils/parsingUtils";
+import { useMemo, useState } from "react";
+import { DatePickerInput } from "@mantine/dates";
 
 export default function HomePage() {
+  const messages = useMemo(() => getMessages(), []);
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
+    null,
+    null,
+  ]);
+
+  const selectedMessages = useMemo(() => {
+    const startDate = dateRange[0];
+    const endDate = dateRange[1];
+    return startDate && endDate
+      ? messages.filter(
+          (message) => message.date >= startDate && message.date <= endDate
+        )
+      : messages;
+  }, [dateRange, messages]);
+
+  const countedTags = useMemo(() => {
+    const tagCounts = selectedMessages.reduce((counts, message) => {
+      message.tags.forEach((tag) => {
+        counts[tag] = (counts[tag] || 0) + 1;
+      });
+      return counts;
+    }, {} as Record<string, number>);
+    const tagCountArray = Object.entries(tagCounts).map(([tag, count]) => ({
+      tag,
+      count,
+    }));
+    return tagCountArray;
+  }, [selectedMessages]);
+
   return (
     <AppShell header={{ height: { base: 48, sm: 60, lg: 76 } }}>
       <AppShell.Header
@@ -21,34 +54,16 @@ export default function HomePage() {
         <Title order={1}>Torch</Title>
       </AppShell.Header>
       <AppShell.Main>
+        <DatePickerInput
+          type="range"
+          label="Pick date range"
+          placeholder="Pick date range"
+          value={dateRange}
+          onChange={setDateRange}
+        />
         <RadarChart
           h={300}
-          data={[
-            {
-              tag: "Russia",
-              count: 120,
-            },
-            {
-              tag: "Kremlin",
-              count: 98,
-            },
-            {
-              tag: "Putin",
-              count: 86,
-            },
-            {
-              tag: "Tanks",
-              count: 99,
-            },
-            {
-              tag: "Drone",
-              count: 85,
-            },
-            {
-              tag: "Trenches",
-              count: 65,
-            },
-          ]}
+          data={countedTags}
           dataKey="tag"
           withPolarRadiusAxis
           series={[{ name: "count", color: "blue.4", opacity: 0.2 }]}

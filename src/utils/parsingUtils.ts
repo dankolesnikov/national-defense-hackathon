@@ -1,4 +1,4 @@
-import fs from "fs";
+import data from "../app/data/messages.json";
 
 type Message = {
   id: string;
@@ -10,10 +10,10 @@ type Message = {
 };
 
 export const getMessages = (): Message[] => {
-  const filePath = "src/app/data/messages.json";
+  // const filePath = "src/app/data/messages.json";
   try {
-    const rawData = fs.readFileSync(filePath, "utf-8");
-    const messages: Message[] = JSON.parse(rawData).map((item: any) => {
+    // const rawData = fs.readFileSync(filePath, "utf-8");
+    const messages: Message[] = data.map((item: any) => {
       return {
         id: item.id,
         text: item.text,
