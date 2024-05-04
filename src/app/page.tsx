@@ -4,7 +4,6 @@ import HomePage from "./homepage";
 import { getMessages } from "@/utils/parsingUtils";
 
 export default function App() {
-  console.log(getMessages());
   return (
     <MantineProvider>
       <HomePage />
