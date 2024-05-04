@@ -2,7 +2,16 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 import "@mantine/core/styles.css";
-import { AppShell, Group, Title, useMantineColorScheme } from "@mantine/core";
+import {
+  AppShell,
+  Card,
+  Group,
+  SimpleGrid,
+  Space,
+  Stack,
+  Title,
+  useMantineColorScheme,
+} from "@mantine/core";
 import { RadarChart } from "@mantine/charts";
 import { Timeline, Text } from "@mantine/core";
 import {
@@ -21,6 +30,7 @@ import { DatePickerInput } from "@mantine/dates";
 export default function HomePage() {
   const { colorScheme } = useMantineColorScheme();
   const messages = useMemo(() => getMessages(), []);
+
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
     null,
     null,
@@ -50,6 +60,22 @@ export default function HomePage() {
     return tagCountArray;
   }, [selectedMessages]);
 
+  const countedLocations = useMemo(() => {
+    const tagCounts = selectedMessages.reduce((counts, message) => {
+      message.locations.forEach((loc) => {
+        counts[loc] = (counts[loc] || 0) + 1;
+      });
+      return counts;
+    }, {} as Record<string, number>);
+    const locationCountArray = Object.entries(tagCounts).map(
+      ([location, count]) => ({
+        location,
+        count,
+      })
+    );
+    return locationCountArray;
+  }, [selectedMessages]);
+
   return (
     <AppShell header={{ height: { base: 48, sm: 60, lg: 76 } }}>
       <AppShell.Header
@@ -64,80 +90,122 @@ export default function HomePage() {
               height={50}
             />
             <Title fz="h1" fw="300">
-              Torch
+              Torch - Interactive SITREPs
             </Title>
           </Group>
           <DarkModeToggle />
         </Group>
       </AppShell.Header>
-      <AppShell.Main>
-        <DatePickerInput
-          type="range"
-          label="Pick date range"
-          placeholder="Pick date range"
-          value={dateRange}
-          onChange={setDateRange}
-        />
-        <RadarChart
-          h={300}
-          data={countedTags}
-          dataKey="tag"
-          withPolarRadiusAxis
-          series={[{ name: "count", color: "blue.4", opacity: 0.2 }]}
-        />
-        <Timeline active={1} bulletSize={24} lineWidth={2}>
-          <Timeline.Item bullet={<IconNumber1 size={12} />} title="New branch">
-            <Text c="dimmed" size="sm">
-              You&apos;ve created new branch{" "}
-              <Text variant="link" component="span" inherit>
-                fix-notifications
-              </Text>{" "}
-              from master
-            </Text>
-            <Text size="xs" mt={4}>
-              2 hours ago
-            </Text>
-          </Timeline.Item>
+      <AppShell.Main
+        style={{
+          backgroundColor: colorScheme === "light" ? "#f8f9fa" : "#242424",
+        }}
+      >
+        <SimpleGrid cols={2} m="1rem">
+          <div>
+            <Stack>
+              <Card shadow="sm">
+                <DatePickerInput
+                  type="range"
+                  label="Pick date range"
+                  placeholder="Pick date range"
+                  value={dateRange}
+                  onChange={setDateRange}
+                />
+              </Card>
+              <Card shadow="sm">
+                <Timeline active={1} bulletSize={24} lineWidth={2}>
+                  <Timeline.Item
+                    bullet={<IconNumber1 size={12} />}
+                    title="New branch"
+                  >
+                    <Text c="dimmed" size="sm">
+                      You&apos;ve created new branch{" "}
+                      <Text variant="link" component="span" inherit>
+                        fix-notifications
+                      </Text>{" "}
+                      from master
+                    </Text>
+                    <Text size="xs" mt={4}>
+                      2 hours ago
+                    </Text>
+                  </Timeline.Item>
 
-          <Timeline.Item bullet={<IconNumber2 size={12} />} title="Commits">
-            <Text c="dimmed" size="sm">
-              You&apos;ve pushed 23 commits to
-              <Text variant="link" component="span" inherit>
-                fix-notifications branch
-              </Text>
-            </Text>
-            <Text size="xs" mt={4}>
-              52 minutes ago
-            </Text>
-          </Timeline.Item>
+                  <Timeline.Item
+                    bullet={<IconNumber2 size={12} />}
+                    title="Commits"
+                  >
+                    <Text c="dimmed" size="sm">
+                      You&apos;ve pushed 23 commits to
+                      <Text variant="link" component="span" inherit>
+                        fix-notifications branch
+                      </Text>
+                    </Text>
+                    <Text size="xs" mt={4}>
+                      52 minutes ago
+                    </Text>
+                  </Timeline.Item>
 
-          <Timeline.Item
-            bullet={<IconNumber3 size={12} />}
-            title="Pull request"
-          >
-            <Text c="dimmed" size="sm">
-              You&apos;ve submitted a pull request
-              <Text variant="link" component="span" inherit>
-                Fix incorrect notification message (#187)
-              </Text>
-            </Text>
-            <Text size="xs" mt={4}>
-              34 minutes ago
-            </Text>
-          </Timeline.Item>
+                  <Timeline.Item
+                    bullet={<IconNumber3 size={12} />}
+                    title="Pull request"
+                  >
+                    <Text c="dimmed" size="sm">
+                      You&apos;ve submitted a pull request
+                      <Text variant="link" component="span" inherit>
+                        Fix incorrect notification message (#187)
+                      </Text>
+                    </Text>
+                    <Text size="xs" mt={4}>
+                      34 minutes ago
+                    </Text>
+                  </Timeline.Item>
 
-          <Timeline.Item bullet={<IconNumber4 size={12} />} title="Code review">
-            <Text c="dimmed" size="sm">
-              <Text variant="link" component="span" inherit>
-                Robert Gluesticker
-              </Text>{" "}
-              left a code review on your pull request
-            </Text>
-            <Text size="xs" mt={4}>
-              12 minutes ago
-            </Text>
-          </Timeline.Item>
-        </Timeline>
+                  <Timeline.Item
+                    bullet={<IconNumber4 size={12} />}
+                    title="Code review"
+                  >
+                    <Text c="dimmed" size="sm">
+                      <Text variant="link" component="span" inherit>
+                        Robert Gluesticker
+                      </Text>{" "}
+                      left a code review on your pull request
+                    </Text>
+                    <Text size="xs" mt={4}>
+                      12 minutes ago
+                    </Text>
+                  </Timeline.Item>
+                </Timeline>
+              </Card>
+            </Stack>
+          </div>
+          <div>
+            <Card shadow="sm">
+              <Text>Theme Analysis</Text>
+              <Card.Section>
+                <RadarChart
+                  h={300}
+                  data={countedTags}
+                  dataKey="tag"
+                  withPolarRadiusAxis
+                  series={[{ name: "count", color: "blue.4", opacity: 0.2 }]}
+                />
+              </Card.Section>
+            </Card>
+            <Card mt="1rem" shadow="sm">
+              <Text>Locations Analysis</Text>
+              <Card.Section>
+                <RadarChart
+                  h={300}
+                  data={countedLocations}
+                  dataKey="location"
+                  withPolarRadiusAxis
+                  series={[{ name: "count", color: "blue.4", opacity: 0.2 }]}
+                />
+              </Card.Section>
+            </Card>
+          </div>
+        </SimpleGrid>
       </AppShell.Main>
       {/* <main className={styles.main}>
         <div className={styles.description}>

@@ -1,4 +1,4 @@
-import data from "../app/data/messages.json";
+import data from "../app/data/messages_subset.json";
 
 type Message = {
   id: string;
@@ -10,16 +10,14 @@ type Message = {
 };
 
 export const getMessages = (): Message[] => {
-  // const filePath = "src/app/data/messages.json";
   try {
-    // const rawData = fs.readFileSync(filePath, "utf-8");
     const messages: Message[] = data.map((item: any) => {
       return {
         id: item.id,
         text: item.text,
         locations: item.locations,
         tags: item.tags,
-        sentiment: item.sentiment,
+        sentiment: Number(item.sentiment),
         date: new Date(item.date),
       };
     });
