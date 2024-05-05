@@ -19,10 +19,43 @@ import {
   IconNumber2,
   IconNumber3,
   IconNumber4,
+  IconNumber5,
+  IconNumber6,
+  IconNumber7,
+  IconNumber8,
+  IconNumber9,
 } from "@tabler/icons-react";
 import torch_dark_mode from "../../public/torch_white.svg";
 import torch_light_mode from "../../public/torch_black.svg";
 import { DarkModeToggle } from "./components/DarkModeToggle";
+import { getEvents } from "@/utils/parsingUtils";
+import Maps from "./components/Maps";
+import { orderBy } from "lodash";
+
+const renderIconTimeline = (index: number) => {
+  switch (index) {
+    case 0:
+      return <IconNumber1 size={12} />;
+    case 1:
+      return <IconNumber2 size={12} />;
+    case 2:
+      return <IconNumber3 size={12} />;
+    case 3:
+      return <IconNumber4 size={12} />;
+    case 4:
+      return <IconNumber5 size={12} />;
+    case 5:
+      return <IconNumber6 size={12} />;
+    case 6:
+      return <IconNumber7 size={12} />;
+    case 7:
+      return <IconNumber8 size={12} />;
+    case 8:
+      return <IconNumber9 size={12} />;
+    default:
+      return <IconNumber9 size={12} />;
+  }
+};
 import { Message, getMessages } from "@/utils/parsingUtils";
 import { useMemo, useState } from "react";
 import { DatePickerInput, DatesProvider } from "@mantine/dates";
@@ -30,6 +63,23 @@ import { DatePickerInput, DatesProvider } from "@mantine/dates";
 export default function HomePage() {
   const { colorScheme } = useMantineColorScheme();
   const messages = useMemo(() => getMessages(), []);
+  const eventsDataPayload = useMemo(() => {
+    const data = orderBy(
+      getEvents().map((item) => {
+        return {
+          ...item,
+          ranking: item.severity === "important" ? 1 : 0,
+        };
+      }),
+      "ranking",
+      "desc"
+    );
+    return {
+      events: data,
+      importantEventsCount:
+        data.filter((item) => item.severity === "important").length - 1,
+    };
+  }, []);
 
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
     null,
@@ -141,7 +191,7 @@ export default function HomePage() {
       <AppShell.Header
         style={{ alignItems: "center", justifyContent: "center" }}
       >
-        <Group justify="space-between" pr="0.5rem" pt="0.6rem">
+        <Group justify="space-between" mr="1rem" pt="0.6rem">
           <Group gap={0}>
             <Image
               src={colorScheme === "light" ? torch_light_mode : torch_dark_mode}
@@ -174,74 +224,36 @@ export default function HomePage() {
                 />
               </Card>
               <Card shadow="sm">
-                <Timeline active={1} bulletSize={24} lineWidth={2}>
-                  <Timeline.Item
-                    bullet={<IconNumber1 size={12} />}
-                    title="New branch"
-                  >
-                    <Text c="dimmed" size="sm">
-                      You&apos;ve created new branch{" "}
-                      <Text variant="link" component="span" inherit>
-                        fix-notifications
-                      </Text>{" "}
-                      from master
-                    </Text>
-                    <Text size="xs" mt={4}>
-                      2 hours ago
-                    </Text>
-                  </Timeline.Item>
-
-                  <Timeline.Item
-                    bullet={<IconNumber2 size={12} />}
-                    title="Commits"
-                  >
-                    <Text c="dimmed" size="sm">
-                      You&apos;ve pushed 23 commits to
-                      <Text variant="link" component="span" inherit>
-                        fix-notifications branch
-                      </Text>
-                    </Text>
-                    <Text size="xs" mt={4}>
-                      52 minutes ago
-                    </Text>
-                  </Timeline.Item>
-
-                  <Timeline.Item
-                    bullet={<IconNumber3 size={12} />}
-                    title="Pull request"
-                  >
-                    <Text c="dimmed" size="sm">
-                      You&apos;ve submitted a pull request
-                      <Text variant="link" component="span" inherit>
-                        Fix incorrect notification message (#187)
-                      </Text>
-                    </Text>
-                    <Text size="xs" mt={4}>
-                      34 minutes ago
-                    </Text>
-                  </Timeline.Item>
-
-                  <Timeline.Item
-                    bullet={<IconNumber4 size={12} />}
-                    title="Code review"
-                  >
-                    <Text c="dimmed" size="sm">
-                      <Text variant="link" component="span" inherit>
-                        Robert Gluesticker
-                      </Text>{" "}
-                      left a code review on your pull request
-                    </Text>
-                    <Text size="xs" mt={4}>
-                      12 minutes ago
-                    </Text>
-                  </Timeline.Item>
+                <Text pb="2rem">Key Events</Text>
+                <Timeline
+                  active={eventsDataPayload.importantEventsCount}
+                  bulletSize={24}
+                  lineWidth={2}
+                  color="red"
+                >
+                  {eventsDataPayload.events.map((eventPayload, index) => {
+                    return (
+                      <Timeline.Item
+                        key={eventPayload.title}
+                        bullet={renderIconTimeline(index)}
+                        title={eventPayload.title}
+                      >
+                        <Text c="dimmed" size="sm">
+                          {eventPayload.description}
+                        </Text>
+                        <Text size="xs" mt={4}>
+                          {eventPayload.date.toLocaleString()}
+                        </Text>
+                      </Timeline.Item>
+                    );
+                  })}
                 </Timeline>
               </Card>
             </Stack>
           </div>
           <div>
             <Card shadow="sm">
-              <Text>Theme Analysis</Text>
+              <Text>Themes</Text>
               <Card.Section>
                 <RadarChart
                   h={300}
@@ -252,8 +264,8 @@ export default function HomePage() {
                 />
               </Card.Section>
             </Card>
-            <Card mt="1rem" shadow="sm">
-              <Text>Locations Analysis</Text>
+            <Card mt="1rem" mb="1rem" shadow="sm">
+              <Text>Location Mentions</Text>
               <Card.Section>
                 <RadarChart
                   h={300}
@@ -264,6 +276,7 @@ export default function HomePage() {
                 />
               </Card.Section>
             </Card>
+            <Maps />
             <Card mt="1rem" shadow="sm">
               <Text>Sentiment Trend</Text>
               <Card.Section>
@@ -285,96 +298,6 @@ export default function HomePage() {
           </div>
         </SimpleGrid>
       </AppShell.Main>
-      {/* <main className={styles.main}>
-        <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>src/app/page.tsx</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{" "}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
-        </div>
-
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
-          />
-        </div>
-
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p>Explore starter templates for Next.js.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p>
-              Instantly deploy your Next.js site to a shareable URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main> */}
     </AppShell>
   );
 }

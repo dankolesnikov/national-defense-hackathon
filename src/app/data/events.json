@@ -1,0 +1,37 @@
+[
+  {
+    "title": "Ukrainian resistance against Russian offensive",
+    "description": "Reports of Ukrainian forces defending against Russian attacks and inflicting casualties on Russian troops in areas like Avdiivka, Donetsk, and Umansky.",
+    "severity": "important",
+    "date": "2024-04-01",
+    "locations": ["Avdiivka", "Donetsk", "Umansky"]
+  },
+  {
+    "title": "Russian mobilization and military activities",
+    "description": "Mentions of Russian military movements, offensive preparations, and potential large-scale offensive operations against Ukraine.",
+    "severity": "important",
+    "date": "2024-04-01",
+    "locations": []
+  },
+  {
+    "title": "Casualties and memorials",
+    "description": "Posts about Russian and Ukrainian military casualties, including memorials and farewells for fallen soldiers.",
+    "severity": "normal",
+    "date": "2024-04-01",
+    "locations": ["Evpatoria"]
+  },
+  {
+    "title": "French stance on Russia-Ukraine conflict",
+    "description": "Comments from the French Foreign Minister regarding France's position on the conflict, expectations from Russia, and potential NATO involvement.",
+    "severity": "important",
+    "date": "2024-04-01",
+    "locations": ["France"]
+  },
+  {
+    "title": "Local governance and infrastructure",
+    "description": "Posts related to local governance, infrastructure issues, and public reception in areas affected by the conflict.",
+    "severity": "normal",
+    "date": "2024-04-01",
+    "locations": ["Shakhtarsky municipal district", "Kirovskoye"]
+  }
+]
