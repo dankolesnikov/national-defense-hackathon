@@ -1,4 +1,6 @@
 import data from "../app/data/messages_subset.json";
+import eventsData from "../app/data/events.json";
+import { omit } from "lodash";
 
 type Message = {
   id: string;
@@ -7,6 +9,14 @@ type Message = {
   tags: string[];
   sentiment: number;
   date: Date;
+};
+
+type Event = {
+  title: string;
+  description: string;
+  severity: string;
+  date: Date;
+  locations: string[];
 };
 
 export const getMessages = (): Message[] => {
@@ -24,6 +34,21 @@ export const getMessages = (): Message[] => {
     return messages;
   } catch (error) {
     console.error("Error reading messages file:", error);
+    return [];
+  }
+};
+
+export const getEvents = (): Event[] => {
+  try {
+    const events: Event[] = eventsData.map((item: any) => {
+      return {
+        ...omit(item, "date"),
+        date: new Date(item.date),
+      };
+    });
+    return events;
+  } catch (error) {
+    console.error("Error reading events file:", error);
     return [];
   }
 };
