@@ -26,6 +26,7 @@ import { DarkModeToggle } from "./components/DarkModeToggle";
 import { getMessages } from "@/utils/parsingUtils";
 import { useMemo, useState } from "react";
 import { DatePickerInput } from "@mantine/dates";
+import Maps from "./components/Maps";
 
 export default function HomePage() {
   const { colorScheme } = useMantineColorScheme();
@@ -114,6 +115,7 @@ export default function HomePage() {
                 />
               </Card>
               <Card shadow="sm">
+                <Text pb="2rem">Key Events</Text>
                 <Timeline active={1} bulletSize={24} lineWidth={2}>
                   <Timeline.Item
                     bullet={<IconNumber1 size={12} />}
@@ -181,7 +183,7 @@ export default function HomePage() {
           </div>
           <div>
             <Card shadow="sm">
-              <Text>Theme Analysis</Text>
+              <Text>Themes</Text>
               <Card.Section>
                 <RadarChart
                   h={300}
@@ -192,8 +194,8 @@ export default function HomePage() {
                 />
               </Card.Section>
             </Card>
-            <Card mt="1rem" shadow="sm">
-              <Text>Locations Analysis</Text>
+            <Card mt="1rem" mb="1rem" shadow="sm">
+              <Text>Location Mentions</Text>
               <Card.Section>
                 <RadarChart
                   h={300}
@@ -204,6 +206,7 @@ export default function HomePage() {
                 />
               </Card.Section>
             </Card>
+            <Maps />
           </div>
         </SimpleGrid>
       </AppShell.Main>
