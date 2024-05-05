@@ -26,10 +26,20 @@ const mariuopol = {
   lng: 37.5434,
 };
 
+const odesa = {
+  lat: 46.4702,
+  lng: 30.7306,
+};
+
+const dnipro = {
+  lat: 48.4647,
+  lng: 35.0462,
+};
+
 const MyComponent = () => {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
-    googleMapsApiKey: "AIzaSyDb2JU6weneGJyiYB0sBBBbF6ZPYFg3WaQ",
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
   });
 
   const [map, setMap] = React.useState(null);
@@ -57,6 +67,8 @@ const MyComponent = () => {
       <Marker position={kramatorsk} label="Kramatorsk" />
       <Marker position={berdyansk} label="Berdyansk" />
       <Marker position={mariuopol} label="Mariuopol" />
+      <Marker position={odesa} label="Odesa" />
+      <Marker position={dnipro} label="Dnipro" />
       {/* Child components, such as markers, info windows, etc. */}
       <></>
     </GoogleMap>
