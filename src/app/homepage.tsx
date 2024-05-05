@@ -36,13 +36,30 @@ export default function HomePage() {
     null,
   ]);
 
+  const { earliestDate, latestDate } = useMemo(() => {
+    let earliestDate = messages[0].date;
+    let latestDate = messages[0].date;
+
+    for (const message of messages) {
+      if (message.date < earliestDate) {
+        earliestDate = message.date;
+      } else if (message.date > latestDate) {
+        latestDate = message.date;
+      }
+    }
+
+    return { earliestDate, latestDate };
+  }, [messages]);
+
   const selectedMessages = useMemo(() => {
     const startDate = dateRange[0];
     const endDate = dateRange[1];
     return startDate && endDate
-      ? messages.filter(
-          (message) => message.date >= startDate && message.date <= endDate
-        )
+      ? messages.filter((message) => {
+          const roundedDate = new Date(message.date);
+          roundedDate.setHours(0, 0, 0, 0);
+          return roundedDate >= startDate && roundedDate <= endDate;
+        })
       : messages;
   }, [dateRange, messages]);
 
@@ -166,8 +183,11 @@ export default function HomePage() {
             <Stack>
               <Card shadow="sm">
                 <DatePickerInput
+                  allowSingleDateInRange
                   type="range"
                   label="Pick date range"
+                  minDate={earliestDate}
+                  maxDate={latestDate}
                   placeholder="Pick date range"
                   value={dateRange}
                   onChange={setDateRange}
