@@ -30,6 +30,12 @@ import { DarkModeToggle } from "./components/DarkModeToggle";
 import { getEvents } from "@/utils/parsingUtils";
 import Maps from "./components/Maps";
 import { orderBy } from "lodash";
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+  dangerouslyAllowBrowser: true,
+});
 
 const renderIconTimeline = (index: number) => {
   switch (index) {
@@ -56,12 +62,13 @@ const renderIconTimeline = (index: number) => {
   }
 };
 import { Message, getMessages } from "@/utils/parsingUtils";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DatePickerInput, DatesProvider } from "@mantine/dates";
 
 export default function HomePage() {
   const { colorScheme } = useMantineColorScheme();
   const messages = useMemo(() => getMessages(), []);
+  const [debrief, setDebrief] = useState<string>("");
 
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
     null,
@@ -91,6 +98,23 @@ export default function HomePage() {
       "desc"
     );
   }, [dateRange, events]);
+
+  const getDebrief = useCallback(async () => {
+    const completion = await openai.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: `You are a national security assistant. I am going to provide some events from the Russia-Ukraine conflict. Please summarize them in one paragraph.\n Here are the events:\n\n ${selectedEvents}`,
+        },
+      ],
+      model: "gpt-3.5-turbo",
+    });
+    setDebrief(completion.choices[0].message.content ?? "");
+  }, [selectedEvents]);
+
+  useEffect(() => {
+    getDebrief();
+  }, [getDebrief]);
 
   const importantEventsCount = useMemo(
     () =>
@@ -259,11 +283,7 @@ export default function HomePage() {
                 <Title pb="2rem" order={3}>
                   Debrief
                 </Title>
-                <Text size="md">
-                  {
-                    "It's not only writers who can benefit from this free online tool. If you're a programmer who's working on a project where blocks of text are needed, this tool can be a great way to get that. It's a good way to test your programming and that the tool being created is working well.\n\nAbove are a few examples of how the random paragraph generator can be beneficial. The best way to see if this random paragraph picker will be useful for your intended purposes is to give it a try. Generate a number of paragraphs to see if they are beneficial to your current project.\n\nIf you do find this paragraph tool useful, please do us a favor and let us know how you're using it. It's greatly beneficial for us to know the different ways this tool is being used so we can improve it with updates. This is especially true since there are times when the generators we create get used in completely unanticipated ways from when we initially created them. If you have the time, please send us a quick note on what you'd like to see changed or added to make it better in the future."
-                  }
-                </Text>
+                <Text size="md">{debrief}</Text>
               </Card>
               <Card shadow="sm">
                 <Title pb="2rem" order={3}>
