@@ -1,6 +1,5 @@
 "use client";
 import Image from "next/image";
-import styles from "./page.module.css";
 import "@mantine/core/styles.css";
 import { RadarChart, Sparkline } from "@mantine/charts";
 import {
@@ -63,9 +62,26 @@ import { DatePickerInput, DatesProvider } from "@mantine/dates";
 export default function HomePage() {
   const { colorScheme } = useMantineColorScheme();
   const messages = useMemo(() => getMessages(), []);
-  const eventsDataPayload = useMemo(() => {
-    const data = orderBy(
-      getEvents().map((item) => {
+
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
+    null,
+    null,
+  ]);
+
+  const events = useMemo(() => getEvents(), []);
+  const selectedEvents = useMemo(() => {
+    const startDate = dateRange[0];
+    const endDate = dateRange[1];
+    const dateFilteredEvents =
+      startDate && endDate
+        ? events.filter((event) => {
+            const roundedDate = new Date(event.date);
+            roundedDate.setHours(0, 0, 0, 0);
+            return roundedDate >= startDate && roundedDate <= endDate;
+          })
+        : events;
+    return orderBy(
+      dateFilteredEvents.map((item) => {
         return {
           ...item,
           ranking: item.severity === "important" ? 1 : 0,
@@ -74,17 +90,13 @@ export default function HomePage() {
       "ranking",
       "desc"
     );
-    return {
-      events: data,
-      importantEventsCount:
-        data.filter((item) => item.severity === "important").length - 1,
-    };
-  }, []);
+  }, [dateRange, events]);
 
-  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
-    null,
-    null,
-  ]);
+  const importantEventsCount = useMemo(
+    () =>
+      selectedEvents.filter((item) => item.severity === "important").length - 1,
+    [selectedEvents]
+  );
 
   const { earliestDate, latestDate } = useMemo(() => {
     let earliestDate = messages[0].date;
@@ -115,7 +127,7 @@ export default function HomePage() {
 
   const countedTags = useMemo(() => {
     const tagCounts = selectedMessages.reduce((counts, message) => {
-      message.tags.forEach((tag) => {
+      message.tags?.forEach((tag) => {
         counts[tag] = (counts[tag] || 0) + 1;
       });
       return counts;
@@ -124,7 +136,7 @@ export default function HomePage() {
       tag,
       count,
     }));
-    return tagCountArray;
+    return tagCountArray.sort((a, b) => b.count - a.count).slice(0, 5);
   }, [selectedMessages]);
 
   const chunkedMessages = useMemo(() => {
@@ -135,10 +147,7 @@ export default function HomePage() {
       const year = message.date.getFullYear();
 
       // Combine them into a single string
-      // const dateString = `${dayOfMonth}-${month}-${year}`;
-      const dateString = [...Array(10)]
-        .map(() => Math.random().toString(36)[2])
-        .join("");
+      const dateString = `${dayOfMonth}-${month}-${year}`;
 
       if (!acc[dateString]) {
         acc[dateString] = [];
@@ -189,7 +198,10 @@ export default function HomePage() {
 
   const countedLocations = useMemo(() => {
     const tagCounts = selectedMessages.reduce((counts, message) => {
-      message.locations.forEach((loc) => {
+      message.locations?.forEach((loc) => {
+        if (loc === "") {
+          return;
+        }
         counts[loc] = (counts[loc] || 0) + 1;
       });
       return counts;
@@ -200,7 +212,7 @@ export default function HomePage() {
         count,
       })
     );
-    return locationCountArray;
+    return locationCountArray.sort((a, b) => b.count - a.count).slice(0, 7);
   }, [selectedMessages]);
 
   return (
@@ -246,12 +258,12 @@ export default function HomePage() {
               <Card shadow="sm">
                 <Text pb="2rem">Key Events</Text>
                 <Timeline
-                  active={eventsDataPayload.importantEventsCount}
+                  active={importantEventsCount}
                   bulletSize={24}
                   lineWidth={2}
                   color="red"
                 >
-                  {eventsDataPayload.events.map((eventPayload, index) => {
+                  {selectedEvents.map((eventPayload, index) => {
                     return (
                       <Timeline.Item
                         key={eventPayload.title}
@@ -298,11 +310,11 @@ export default function HomePage() {
             </Card>
             <Maps />
             <Card mt="1rem" shadow="sm">
-              <Text>Sentiment Trend</Text>
+              <Text>Daily Sentiment Trend</Text>
               <Card.Section>
                 <Sparkline
-                  w={600}
-                  h={200}
+                  w={900}
+                  h={400}
                   data={sentimentTrend}
                   curveType="linear"
                   trendColors={{

@@ -1,4 +1,4 @@
-import data from "../app/data/messages_subset.json";
+import data from "../app/data/messages.json";
 import eventsData from "../app/data/events.json";
 import { omit } from "lodash";
 
