@@ -2,7 +2,7 @@ import data from "../app/data/messages_subset.json";
 import eventsData from "../app/data/events.json";
 import { omit } from "lodash";
 
-type Message = {
+export type Message = {
   id: string;
   text: string;
   locations: string[];
