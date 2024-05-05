@@ -3,7 +3,7 @@ import Image from "next/image";
 import styles from "./page.module.css";
 import "@mantine/core/styles.css";
 import { AppShell, Group, Title, useMantineColorScheme } from "@mantine/core";
-import { RadarChart } from "@mantine/charts";
+import { RadarChart, Sparkline } from "@mantine/charts";
 import { Timeline, Text } from "@mantine/core";
 import {
   IconNumber1,
@@ -14,9 +14,9 @@ import {
 import torch_dark_mode from "../../public/torch_white.svg";
 import torch_light_mode from "../../public/torch_black.svg";
 import { DarkModeToggle } from "./components/DarkModeToggle";
-import { getMessages } from "@/utils/parsingUtils";
+import { Message, getMessages } from "@/utils/parsingUtils";
 import { useMemo, useState } from "react";
-import { DatePickerInput } from "@mantine/dates";
+import { DatePickerInput, DatesProvider } from "@mantine/dates";
 
 export default function HomePage() {
   const { colorScheme } = useMantineColorScheme();
@@ -50,6 +50,62 @@ export default function HomePage() {
     return tagCountArray;
   }, [selectedMessages]);
 
+  const chunkedMessages = useMemo(() => {
+    // Iterate through messages
+    const groupedMessages = selectedMessages.reduce((acc, message) => {
+      const dayOfMonth = String(message.date.getDate()).padStart(2, "0");
+      const month = String(message.date.getMonth() + 1).padStart(2, "0"); // Adding 1 because getMonth() returns zero-based month index (0-11)
+      const year = message.date.getFullYear();
+
+      // Combine them into a single string
+      const dateString = `${dayOfMonth}-${month}-${year}`;
+      if (!acc[dateString]) {
+        acc[dateString] = [];
+      }
+
+      // Add message to corresponding date
+      acc[dateString].push(message);
+      return acc;
+    }, {} as Record<string, Message[]>);
+
+    // Convert object to array of arrays
+    const result = Object.values(groupedMessages);
+
+    return result;
+  }, [selectedMessages]);
+
+  const sentimentTrend = useMemo(() => {
+    const aggregatedSentiments = {} as Record<string, number>;
+
+    // Iterate over the keys (date strings) in the object
+    for (const dateKey in chunkedMessages) {
+      let sentimentSum = 0;
+      let sentimentCount = 0;
+
+      // Iterate over the array of messages for the current day
+      chunkedMessages[dateKey].forEach((message) => {
+        // Add sentiment value to the sum
+        sentimentSum += message.sentiment;
+        // Increment sentiment count
+        sentimentCount++;
+      });
+
+      // Calculate average sentiment for the current day
+      const averageSentiment =
+        sentimentCount > 0 ? sentimentSum / sentimentCount : 0;
+
+      // Store the aggregated sentiment value for the current day in the aggregatedSentiments object
+      aggregatedSentiments[dateKey] = averageSentiment;
+    }
+
+    // Sort the aggregatedData object by day from earliest to latest
+    const sortedAggregatedData = Object.entries(aggregatedSentiments)
+      .sort(([date1], [date2]) => date1.localeCompare(date2))
+      .map(([_, averageSentiment]) => averageSentiment);
+
+    return sortedAggregatedData;
+  }, [chunkedMessages]);
+
   return (
     <AppShell header={{ height: { base: 48, sm: 60, lg: 76 } }}>
       <AppShell.Header
@@ -77,6 +133,19 @@ export default function HomePage() {
           placeholder="Pick date range"
           value={dateRange}
           onChange={setDateRange}
+        />
+        <Sparkline
+          w={200}
+          h={60}
+          data={sentimentTrend}
+          curveType="linear"
+          trendColors={{
+            positive: "teal.6",
+            negative: "red.6",
+            neutral: "gray.5",
+          }}
+          fillOpacity={0.6}
+          strokeWidth={2}
         />
         <RadarChart
           h={300}

@@ -1,6 +1,6 @@
 import data from "../app/data/messages.json";
 
-type Message = {
+export type Message = {
   id: string;
   text: string;
   locations: string[];
